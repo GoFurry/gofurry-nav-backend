@@ -85,6 +85,10 @@ func (svc *navPageService) GetSiteList(lang string) (res []models.SiteVo, err co
 			res = append(res, newRecord)
 		}
 	}
+
+	// 成功查询站点增加浏览量
+	addCount()
+
 	return res, nil
 }
 
@@ -404,4 +408,15 @@ func isValidImage(filename string) bool {
 		}
 	}
 	return false
+}
+
+// 增加浏览量
+func addCount() {
+	cs.Incr("stat-count:total") // 总访问量
+	year := util.Int642String(int64(time.Now().Year()))
+	month := util.Int642String(int64(time.Now().Month()))
+	day := util.Int642String(int64(time.Now().Day()))
+	cs.Incr("stat-count:" + year)                           // 年访问量
+	cs.Incr("stat-count:" + year + "-" + month)             // 月访问量
+	cs.Incr("stat-count:" + year + "-" + month + "-" + day) // 日访问量
 }

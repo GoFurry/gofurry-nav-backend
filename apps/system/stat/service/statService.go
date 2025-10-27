@@ -3,8 +3,11 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"math"
+	"sort"
 	"time"
 
+	logModels "github.com/GoFurry/gofurry-nav-backend/apps/nav/sitePage/models"
 	"github.com/GoFurry/gofurry-nav-backend/apps/system/stat/dao"
 	"github.com/GoFurry/gofurry-nav-backend/apps/system/stat/models"
 	"github.com/GoFurry/gofurry-nav-backend/common"
@@ -68,8 +71,8 @@ func (s statService) ViewsCount() (res models.ViewsCountVo, err common.GFError) 
 }
 
 // 获取数量最多的分组
-func (s statService) GroupCount() (res []models.GroupCountVo, err common.GFError) {
-	return dao.GetStatDao().GetGroupCount()
+func (s statService) GroupCount(lang string) (res []models.GroupCountVo, err common.GFError) {
+	return dao.GetStatDao().GetGroupCount(lang)
 }
 
 // 获取访问国家统计
@@ -87,6 +90,80 @@ func (s statService) ProvinceCount() (res models.RegionCountVo, err common.GFErr
 // 获取访问城市统计
 func (s statService) CityCount() (res models.RegionCountVo, err common.GFError) {
 	res.RegionMap = readTopCache("stat-geoip-city:top")
+	return
+}
+
+// 获取近日收录站点列表
+func (s statService) SiteList(lang string) (res []models.SiteListVo, err common.GFError) {
+	return dao.GetStatDao().GetSiteList(lang)
+}
+
+// 获取导航站点的基本数据
+func (s statService) SiteCommonInfo() (res models.SiteCommonInfoVo, err common.GFError) {
+	res.CommonCountModel, err = dao.GetStatDao().GetCommonCount()
+	if err != nil {
+		common.NewServiceError(err.GetMsg())
+	}
+
+	var nsfwCnt, welfareCnt int64
+	siteTypeList, err := dao.GetStatDao().GetSiteCommon()
+	if err != nil {
+		common.NewServiceError(err.GetMsg())
+	}
+	for _, v := range siteTypeList {
+		if v.NSFW == "1" {
+			nsfwCnt++
+		}
+		if v.Welfare == "1" {
+			welfareCnt++
+		}
+	}
+
+	res.SfwNsfwRatio = math.Round(float64(nsfwCnt)/float64(res.CommonCountModel.SiteCount)*100) / 100
+	res.NonProfitRatio = math.Round(float64(welfareCnt)/float64(res.CommonCountModel.SiteCount)*100) / 100
+
+	var pingCnt, pingSum int64
+	jsonPingList, gfsError := cs.GetString("stat-common:latest-ping-log")
+	if gfsError != nil {
+		common.NewServiceError(err.GetMsg())
+	}
+	var pingRecord []logModels.GfnCollectorLogPing
+	json.Unmarshal([]byte(jsonPingList), &pingRecord)
+
+	if err != nil {
+		common.NewServiceError(err.GetMsg())
+	}
+	for _, v := range pingRecord {
+		pingSum++
+		if v.Status == "up" {
+			pingCnt++
+		}
+	}
+
+	if pingSum == 0 {
+		res.SiteReachRate = 0.0 // 或根据业务需求设置默认值
+	} else {
+		res.SiteReachRate = math.Round(float64(pingCnt)/float64(pingSum)*100) / 100
+	}
+
+	return res, nil
+}
+
+// 获取最近的最高延迟的 ping 记录
+func (s statService) SitePingList() (res []models.PingLogVo, err common.GFError) {
+
+	jsonStr, gfsError := cs.GetString("stat-common:latest-ping-log")
+	if gfsError != nil {
+		common.NewServiceError(gfsError.GetMsg())
+	}
+	json.Unmarshal([]byte(jsonStr), &res)
+
+	sort.Slice(res, func(i, j int) bool {
+		delayI := util.ExtractSuffix2Int(res[i].Delay, "ms")
+		delayJ := util.ExtractSuffix2Int(res[j].Delay, "ms")
+		return delayI > delayJ
+	})
+
 	return
 }
 

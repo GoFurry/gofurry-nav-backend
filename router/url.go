@@ -48,12 +48,14 @@ func navApi(g fiber.Router) {
 
 func statApi(g fiber.Router) {
 	// 数据
-	g.Get("/add/count", stat.StatApi.AddCount)                             // 增加访问量
 	g.Get(("/chart/views/count"), stat.StatApi.GetViewsCount)              // 获取访问量数据
 	g.Get(("/chart/views/region/country"), stat.StatApi.GetCountryCount)   // 获取访问国家统计
 	g.Get(("/chart/views/region/province"), stat.StatApi.GetProvinceCount) // 获取访问省份统计
 	g.Get(("/chart/views/region/city"), stat.StatApi.GetCityCount)         // 获取访问城市统计
 	g.Get(("/chart/group/count"), stat.StatApi.GetGroupCount)              // 获取站点分组统计
+	g.Get("/nav/site/list", stat.StatApi.GetSiteList)                      // 获取近日收录的站点
+	g.Get("/nav/site/ping/list", stat.StatApi.GetSitePingList)             // 获取最近的最高延迟的 ping 记录
+	g.Get("/nav/site/common", stat.StatApi.GetSiteCommonInfo)              // 获取导航站点的基本数据
 
 	// 鉴权
 

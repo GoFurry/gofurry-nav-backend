@@ -30,4 +30,5 @@ func InitScheduleOnStart() {
 func Schedule() {
 	// task 任务
 	task.UpdateTopCountCache()
+	task.UpdateLatestPingLog()
 }

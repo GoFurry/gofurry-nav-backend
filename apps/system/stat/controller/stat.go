@@ -14,31 +14,13 @@ func init() {
 	StatApi = &statApi{}
 }
 
-// @Summary 增加浏览数
-// @Schemes
-// @Description 增加浏览数
-// @Tags Stat
-// @Accept json
-// @Produce json
-// @Success 200 {object} common.ResultData
-// @Router /api/stat/add/count [Get]
-func (api *statApi) AddCount(c *fiber.Ctx) error {
-	// TODO:IP限流和令牌桶限流
-	err := service.GetStatService().AddViewCount()
-	if err != nil {
-		return common.NewResponse(c).Error(err.GetMsg())
-	}
-
-	return common.NewResponse(c).Success()
-}
-
 // @Summary 查询浏览数
 // @Schemes
 // @Description 查询浏览数
 // @Tags Stat
 // @Accept json
 // @Produce json
-// @Success 200 {object} common.ResultData
+// @Success 200 {object} models.ViewsCountVo
 // @Router /api/stat/chart/views/count [Get]
 func (api *statApi) GetViewsCount(c *fiber.Ctx) error {
 	data, err := service.GetStatService().ViewsCount()
@@ -55,10 +37,12 @@ func (api *statApi) GetViewsCount(c *fiber.Ctx) error {
 // @Tags Stat
 // @Accept json
 // @Produce json
-// @Success 200 {object} common.ResultData
+// @Param lang query string true "语言"
+// @Success 200 {object} []models.GroupCountVo
 // @Router /api/stat/chart/group/count [Get]
 func (api *statApi) GetGroupCount(c *fiber.Ctx) error {
-	data, err := service.GetStatService().GroupCount()
+	lang := c.Query("lang", "zh")
+	data, err := service.GetStatService().GroupCount(lang)
 	if err != nil {
 		return common.NewResponse(c).Error(err.GetMsg())
 	}
@@ -72,7 +56,7 @@ func (api *statApi) GetGroupCount(c *fiber.Ctx) error {
 // @Tags Stat
 // @Accept json
 // @Produce json
-// @Success 200 {object} common.ResultData
+// @Success 200 {object} models.RegionCountVo
 // @Router /api/stat/chart/views/region/country [Get]
 func (api *statApi) GetCountryCount(c *fiber.Ctx) error {
 	data, err := service.GetStatService().CountryCount()
@@ -89,7 +73,7 @@ func (api *statApi) GetCountryCount(c *fiber.Ctx) error {
 // @Tags Stat
 // @Accept json
 // @Produce json
-// @Success 200 {object} common.ResultData
+// @Success 200 {object} models.RegionCountVo
 // @Router /api/stat/chart/views/region/province [Get]
 func (api *statApi) GetProvinceCount(c *fiber.Ctx) error {
 	data, err := service.GetStatService().ProvinceCount()
@@ -106,10 +90,63 @@ func (api *statApi) GetProvinceCount(c *fiber.Ctx) error {
 // @Tags Stat
 // @Accept json
 // @Produce json
-// @Success 200 {object} common.ResultData
+// @Success 200 {object} models.RegionCountVo
 // @Router /api/stat/chart/views/region/city [Get]
 func (api *statApi) GetCityCount(c *fiber.Ctx) error {
 	data, err := service.GetStatService().CityCount()
+	if err != nil {
+		return common.NewResponse(c).Error(err.GetMsg())
+	}
+
+	return common.NewResponse(c).SuccessWithData(data)
+}
+
+// @Summary 获取近日收录的站点
+// @Schemes
+// @Description 获取近日收录的站点
+// @Tags Stat
+// @Accept json
+// @Produce json
+// @Param lang query string true "语言"
+// @Success 200 {object} []models.SiteListVo
+// @Router /api/stat/nav/site/list [Get]
+func (api *statApi) GetSiteList(c *fiber.Ctx) error {
+	lang := c.Query("lang", "zh")
+	data, err := service.GetStatService().SiteList(lang)
+	if err != nil {
+		return common.NewResponse(c).Error(err.GetMsg())
+	}
+
+	return common.NewResponse(c).SuccessWithData(data)
+}
+
+// @Summary 获取导航站点的基本数据
+// @Schemes
+// @Description 获取导航站点的基本数据
+// @Tags Stat
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.SiteCommonInfoVo
+// @Router /api/stat/nav/site/common [Get]
+func (api *statApi) GetSiteCommonInfo(c *fiber.Ctx) error {
+	data, err := service.GetStatService().SiteCommonInfo()
+	if err != nil {
+		return common.NewResponse(c).Error(err.GetMsg())
+	}
+
+	return common.NewResponse(c).SuccessWithData(data)
+}
+
+// @Summary 获取最近的最高延迟的 ping 记录
+// @Schemes
+// @Description 获取最近的最高延迟的 ping 记录
+// @Tags Stat
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.SiteCommonInfoVo
+// @Router /api/stat/nav/site/ping/list [Get]
+func (api *statApi) GetSitePingList(c *fiber.Ctx) error {
+	data, err := service.GetStatService().SitePingList()
 	if err != nil {
 		return common.NewResponse(c).Error(err.GetMsg())
 	}

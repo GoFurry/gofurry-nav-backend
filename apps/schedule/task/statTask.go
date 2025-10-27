@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	statDao "github.com/GoFurry/gofurry-nav-backend/apps/system/stat/dao"
 	"github.com/GoFurry/gofurry-nav-backend/common/log"
 	cs "github.com/GoFurry/gofurry-nav-backend/common/service"
 	"github.com/GoFurry/gofurry-nav-backend/common/util"
@@ -14,7 +15,7 @@ import (
 
 // 更新访问量最多的几个键
 func UpdateTopCountCache() {
-	log.Info("StatTask 开始...")
+	log.Info("StatTask UpdateTopCountCache 开始...")
 
 	type regionType struct {
 		Prefix   string
@@ -37,7 +38,7 @@ func UpdateTopCountCache() {
 		}
 	}
 
-	log.Info("StatTask 结束...")
+	log.Info("StatTask UpdateTopCountCache 结束...")
 }
 
 func getTopRegion(prefix string, top int) map[string]int64 {
@@ -82,4 +83,18 @@ func getTopRegion(prefix string, top int) map[string]int64 {
 		topMap[kvs[i].Key] = kvs[i].Val
 	}
 	return topMap
+}
+
+func UpdateLatestPingLog() {
+	log.Info("StatTask UpdateLatestPingLog 开始...")
+	recordList, err := statDao.GetStatDao().GetLatestPingLog()
+	if err != nil {
+		log.Error("StatTask UpdateLatestPingLog GetLatestPingLog err:", err)
+	}
+
+	if b, jsonErr := json.Marshal(recordList); jsonErr == nil {
+		cs.SetExpire("stat-common:latest-ping-log", string(b), 24*time.Hour)
+	}
+
+	log.Info("StatTask UpdateLatestPingLog 结束...")
 }

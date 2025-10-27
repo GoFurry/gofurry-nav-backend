@@ -14,18 +14,19 @@ import (
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
-	"github.com/GoFurry/gofurry-nav-backend/common"
-	cm "github.com/GoFurry/gofurry-nav-backend/common/models"
-	"github.com/GoFurry/gofurry-nav-backend/roof/env"
-	"github.com/bwmarrin/snowflake"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/pkg/errors"
 	"math/rand"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/GoFurry/gofurry-nav-backend/common"
+	cm "github.com/GoFurry/gofurry-nav-backend/common/models"
+	"github.com/GoFurry/gofurry-nav-backend/roof/env"
+	"github.com/bwmarrin/snowflake"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/pkg/errors"
 )
 
 var clusterId, _ = snowflake.NewNode(int64(env.GetServerConfig().ClusterId))
@@ -121,6 +122,16 @@ func Float642String(f64 float64) string { return fmt.Sprintf("%.0f", f64) }
 // 大数
 func Decimal(num float64) float64 {
 	num, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", num), 10)
+	return num
+}
+
+// 去除末尾字符并转数字
+func ExtractSuffix2Int(delayStr string, suffix string) int {
+	numStr := strings.TrimSuffix(strings.ToLower(delayStr), suffix)
+	num, err := strconv.Atoi(numStr)
+	if err != nil {
+		return 0
+	}
 	return num
 }
 
