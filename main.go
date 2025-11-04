@@ -70,6 +70,11 @@ WantedBy=multi-user.target`,
 			log.Info("服务卸载成功.")
 			return
 		}
+
+		if os.Args[1] == "version" {
+			log.Info("gf-nav V1.0.0")
+			return
+		}
 	}
 
 	// 内存限制和 GC 策略
