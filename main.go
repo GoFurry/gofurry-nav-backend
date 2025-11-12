@@ -17,9 +17,9 @@ import (
 	"github.com/kardianos/service"
 )
 
-//@title GoFurry-Fiber
+//@title GoFurry-Nav-Backend
 //@version v1.0.0
-//@description GoFurry-Fiber
+//@description GoFurry-Nav-Backend
 
 var (
 	errChan = make(chan error)

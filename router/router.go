@@ -40,7 +40,7 @@ func (router *router) Init() *fiber.App {
 	app := fiber.New(fiber.Config{
 		Network:      fiber.NetworkTCP6, // tcp tcp4 tcp6 三种模式
 		AppName:      common.COMMON_PROJECT_NAME,
-		ServerHeader: "GoFurry-Cloud",
+		ServerHeader: "GoFurry-Nav",
 		Prefork:      false, // 多核cpu处理高并发 业务量小需关闭
 		// 在生产环境禁用错误堆栈跟踪
 		EnablePrintRoutes: env.GetServerConfig().Server.Mode == "debug",
